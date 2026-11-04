@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #dfe7f5;
+        --success: #16a34a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #eef4ff 0%, #f7f9fc 100%);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 700px;
+        margin: 60px auto;
+        padding: 24px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
+        padding: 24px;
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 2rem;
+      }
+
+      form {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      input {
+        flex: 1 1 280px;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 1rem;
+      }
+
+      button {
+        border: none;
+        background: var(--primary);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      button:hover {
+        background: var(--primary-dark);
+      }
+
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      li:last-child {
+        border-bottom: none;
+      }
+
+      .task-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+      }
+
+      .task-meta {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 4px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        background: rgba(22, 163, 74, 0.12);
+        color: var(--success);
+        font-weight: 600;
+      }
+
+      .empty-state {
+        color: var(--muted);
+        text-align: center;
+        padding: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Task Manager</h1>
+
+        <form id="task-form">
+          <input
+            id="task-input"
+            type="text"
+            placeholder="Add a new task"
+            aria-label="Task title"
+            required
+          />
+          <button type="submit">Add Task</button>
+        </form>
+
+        <ul id="task-list"></ul>
+      </div>
+    </div>
+
+    <script>
+      const taskForm = document.getElementById('task-form');
+      const taskInput = document.getElementById('task-input');
+      const taskList = document.getElementById('task-list');
+
+      const STORAGE_KEY = 'tasks';
+      let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+        { id: 1, title: 'Plan sprint tasks' },
+        { id: 2, title: 'Review project requirements' }
+      ];
+
+      function saveTasks() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      }
+
+      function renderTasks() {
+        if (!tasks.length) {
+          taskList.innerHTML = '<li class="empty-state">No tasks yet. Add one above.</li>';
+          return;
+        }
+
+        taskList.innerHTML = tasks
+          .map(
+            (task) => `
+              <li>
+                <div>
+                  <div class="task-title">${task.title}</div>
+                  <div class="task-meta">Task #${task.id}</div>
+                </div>
+                <span class="badge">Active</span>
+              </li>
+            `
+          )
+          .join('');
+      }
+
+      taskForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const title = taskInput.value.trim();
+        if (!title) {
+          return;
+        }
+
+        const newTask = {
+          id: Date.now(),
+          title
+        };
+
+        tasks.unshift(newTask);
+        saveTasks();
+        renderTasks();
+        taskForm.reset();
+        taskInput.focus();
+      });
+
+      renderTasks();
+    </script>
+  </body>
+</html>
